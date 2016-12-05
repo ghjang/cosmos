@@ -7,6 +7,18 @@ var g_storeObj = {
 var g_tableOfContentsPageInit = false;
 var g_vocabularyPageInit = false;
 
+function loadWords(episodeNo, panelSelector)
+{
+    var wordClass = panelSelector.substring(1, panelSelector.indexOf("-"));
+    var fileName = episodeNo + "." + wordClass.toUpperCase() + ".txt";
+    $.ajax({
+        url: "https://ghjang.github.io/cosmos/txt/" + fileName,
+        dataType: "text",
+        success: function(data, status, jqXHR) {
+            $(panelSelector).html(data);
+        }
+    });
+}
 
 $(document).on('pagebeforeshow', '#table-of-contents', function(){
     if (g_tableOfContentsPageInit) {
@@ -30,27 +42,12 @@ $(document).on('pagebeforeshow', '#vocabulary', function(){
     if (!g_vocabularyPageInit) {
         $('#tabs').tabs({
             activate: function(e, ui) {
-                $.ajax({
-                    url: "./txt/1.NOUN.txt",
-                    dataType: "text",
-                    success: function(data, status, jqXHR) {
-                        $(ui.newPanel.selector).html(data);
-                    },
-                    error: function(jqXHR, status, error) {
-                        alert("error");
-                    }
-                });
+                loadWords(g_storeObj.selectedEpisodeNo, ui.newPanel.selector);
             } 
         });
         g_vocabularyPageInit = true;
     }
     $('#tabs').tabs('option', 'active', 0);     // select the noun tab.
     $('#noun-tab').addClass('ui-btn-active');   // NOTE: the noun tab is not highlighted. --;
-    $.ajax({
-        url: "/txt/1.NOUN.txt",
-        dataType: "text",
-        success: function(result) {
-            $("#noun-body").html(result);
-        }
-    });
+    loadWords(g_storeObj.selectedEpisodeNo, '#noun-body');
 });
