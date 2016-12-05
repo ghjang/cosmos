@@ -26,5 +26,5 @@ $(document).on('pagebeforeshow', '#vocabulary', function(){
         return;
     }
     $('#episode-name').text(g_storeObj.selectedEpisodeTitle);
-    $('#tabs').tabs('option', 'active', 1);     
+    $('#noun-tab').addClass('ui-btn-active');
 });
