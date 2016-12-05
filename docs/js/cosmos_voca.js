@@ -5,6 +5,7 @@ var g_storeObj = {
 };
 
 var g_tableOfContentsPageInit = false;
+var g_vocabularyPageInit = false;
 
 
 $(document).on('pagebeforeshow', '#table-of-contents', function(){
@@ -26,5 +27,19 @@ $(document).on('pagebeforeshow', '#vocabulary', function(){
         return;
     }
     $('#episode-name').text(g_storeObj.selectedEpisodeTitle);
-    $('#noun-tab').addClass('ui-btn-active');
+    if (!g_vocabularyPageInit) {
+        $('#tabs').tabs({
+            activate: function(e, ui) {
+                $.ajax({
+                    url: "../txt/1.NOUN.txt",
+                    success: function(result) {
+                        $(ui.newPanel.selector).innerText(result);
+                    }
+                });
+            } 
+        });
+        g_vocabularyPageInit = true;
+    }
+    $('#tabs').tabs('option', 'active', 0);     // select the noun tab.
+    $('#noun-tab').addClass('ui-btn-active');   // NOTE: the noun tab is not highlighted. --;
 });
