@@ -31,12 +31,12 @@ $(document).on('pagebeforeshow', '#vocabulary', function(){
         $('#tabs').tabs({
             activate: function(e, ui) {
                 $.ajax({
-                    url: "/txt/1.NOUN.txt",
+                    url: "./txt/1.NOUN.txt",
                     dataType: "text",
-                    success: function(result) {
-                        $(ui.newPanel.selector).html(result);
+                    success: function(data, status, jqXHR) {
+                        $(ui.newPanel.selector).html(data);
                     },
-                    error: function(jqXHR, textStatus, errorThrown) {
+                    error: function(jqXHR, status, error) {
                         alert("error");
                     }
                 });
