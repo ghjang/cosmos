@@ -25,5 +25,6 @@ $(document).on('pagebeforeshow', '#vocabulary', function(){
         $.mobile.changePage('#table-of-contents');
         return;
     }
-    $('#episode-name').text(g_storeObj.selectedEpisodeTitle);     
+    $('#episode-name').text(g_storeObj.selectedEpisodeTitle);
+    $('#tabs').tabs('option', 'active', 1);     
 });
