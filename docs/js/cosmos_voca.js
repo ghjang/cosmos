@@ -31,9 +31,13 @@ $(document).on('pagebeforeshow', '#vocabulary', function(){
         $('#tabs').tabs({
             activate: function(e, ui) {
                 $.ajax({
-                    url: "../txt/1.NOUN.txt",
+                    url: "/txt/1.NOUN.txt",
+                    dataType: "text",
                     success: function(result) {
-                        $(ui.newPanel.selector).innerText(result);
+                        $(ui.newPanel.selector).html(result);
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        alert("error");
                     }
                 });
             } 
@@ -42,4 +46,11 @@ $(document).on('pagebeforeshow', '#vocabulary', function(){
     }
     $('#tabs').tabs('option', 'active', 0);     // select the noun tab.
     $('#noun-tab').addClass('ui-btn-active');   // NOTE: the noun tab is not highlighted. --;
+    $.ajax({
+        url: "/txt/1.NOUN.txt",
+        dataType: "text",
+        success: function(result) {
+            $("#noun-body").html(result);
+        }
+    });
 });
