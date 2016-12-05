@@ -46,10 +46,26 @@
 		<h1 id="episode-name"></h1>
 	</div>
 
-	<div role="main" class="ui-content">
-		<p>I'm the second in the source order so I'm hidden when the page loads. I'm just shown if a link that references my id is beeing clicked.</p>
-		<p><a href="#table-of-contents">Back to Table of Contents.</a></p>
-	</div>
+    <!-- start of tabs -->
+    <div data-role="tabs" id="tabs">
+        <div data-role="navbar">
+            <ul>
+                <li><a href="#noun" class="ui-btn-active" data-ajax="false">Noun</a></li>
+                <li><a href="#verb" data-ajax="false">Verb</a></li>
+                <li><a href="#adjective" data-ajax="false">Adjective</a></li>
+                <li><a href="#adverb" data-ajax="false">Adverb</a></li>
+            </ul>
+        </div>
+        <div id="noun">
+        </div>
+        <div id="verb">
+        </div>
+        <div id="adjective">
+        </div>
+        <div id="adverb">
+        </div>
+    </div>
+    <!-- end of tabs -->
 </div>
 <!-- end of vocabulary page -->
 
