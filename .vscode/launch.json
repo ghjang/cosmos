@@ -18,7 +18,7 @@
             "webRoot": "${workspaceRoot}/docs"
         },
         {
-            "name": "Launch index.html (without sourcemaps)",
+            "name": "Launch index.html",
             "type": "chrome",
             "request": "launch",
             "sourceMaps": true,
