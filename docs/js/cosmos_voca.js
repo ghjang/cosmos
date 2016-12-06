@@ -15,16 +15,18 @@ function loadWords(episodeNo, panelSelector)
         url: "https://ghjang.github.io/cosmos/txt/" + fileName,
         dataType: "text",
         success: function(data, status, jqXHR) {
-            var listHtml = '<div data-role="collapsibleset" data-theme="a" data-content-theme="a">';
+            var listHtml = '<div data-role="collapsibleset" data-theme="a" data-content-theme="a"'
+                                + ' data-filter="true" data-inset="true" data-input="#searchForCollapsibleSet">';
             var words = data.split('\n');
             words.forEach((item, index) => {
-                listHtml += '<div data-role="collapsible">';
+                listHtml += '<div data-role="collapsible" data-filtertext="' + item + '">';
                 listHtml += '<h3>' + item + '</h3>';
                 listHtml += '<p>' + index + '</p>';
                 listHtml += '</div>';
             });
             listHtml += '</div>';
-            $(listHtml).appendTo(panelSelector).enhanceWithin();
+            $(listHtml).appendTo(panelSelector);
+            $('#tabs').enhanceWithin();
         }
     });
 }
