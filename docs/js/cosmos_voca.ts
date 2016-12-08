@@ -1,11 +1,35 @@
-// store obj
-var g_storeObj = {
-    selectedEpisodeNo : 0,
-    selectedEpisodeTitle : ''
-};
+// singleton global state
+class GlobalState
+{
+    private static instance_: GlobalState;
 
-var g_tableOfContentsPageInit = false;
-var g_vocabularyPageInit = false;
+    private constructor() { }
+
+    static getInstance(): GlobalState
+    {
+        if (!GlobalState.instance_) {
+            GlobalState.instance_ = new GlobalState();
+        }
+        return GlobalState.instance_;
+    }
+
+    private selectedEpisodeNo_: number = 0;
+    private selectedEpisodeTitle_: string = '';
+
+    private tableOfContentsPageInit_: boolean = false;
+    private vocabularyPageInit_: boolean = false;
+
+    get selectedEpisodeNo(): number { return this.selectedEpisodeNo_; }
+    set selectedEpisodeNo(no: number) { this.selectedEpisodeNo_ = no; }
+    get selectedEpisodeTitle(): string { return this.selectedEpisodeTitle_; }
+    set selectedEpisodeTitle(title: string) { this.selectedEpisodeTitle_ = title; }
+
+    get tocPageInitState(): boolean { return this.tableOfContentsPageInit_; }
+    set tocPageInitState(state: boolean) { this.tableOfContentsPageInit_ = state; }
+    get vocaPageInitState(): boolean { return this.vocabularyPageInit_; }
+    set vocaPageInitState(state: boolean) { this.vocabularyPageInit_ = state; }
+} // class GlobalState
+
 
 class VocaLoader
 {
@@ -41,36 +65,41 @@ class PageView
     {
         // table of contents page, the front page.
         $(document).on('pagebeforeshow', '#table-of-contents', function(){
-            if (g_tableOfContentsPageInit) {
+            if (GlobalState.getInstance().tocPageInitState) {
                 return;
             }       
             $(document).on('click', '.next-page-button', function(){
-                g_storeObj.selectedEpisodeNo
+                let state = GlobalState.getInstance();
+                state.selectedEpisodeNo
                     = this.innerText.substring(0, this.innerText.indexOf('.'));
-                g_storeObj.selectedEpisodeTitle = this.innerText;
+                state.selectedEpisodeTitle = this.innerText;
                 $.mobile.changePage('#vocabulary');
             });
-            g_tableOfContentsPageInit = true;
+            GlobalState.getInstance().tocPageInitState = true;
         });
 
         // vocabulary page, the second page.
         $(document).on('pagebeforeshow', '#vocabulary', function(){
-            if (g_storeObj.selectedEpisodeTitle == '') {
+            let state = GlobalState.getInstance();
+            if (state.selectedEpisodeTitle == '') {
                 $.mobile.changePage('#table-of-contents');
                 return;
             }
-            $('#episode-name').text(g_storeObj.selectedEpisodeTitle);
-            if (!g_vocabularyPageInit) {
+            $('#episode-name').text(state.selectedEpisodeTitle);
+            if (!state.vocaPageInitState) {
                 $('#tabs').tabs({
                     activate: function(e, ui) {
-                        VocaLoader.loadWords(g_storeObj.selectedEpisodeNo, ui.newPanel.selector);
+                        VocaLoader.loadWords(
+                            GlobalState.getInstance().selectedEpisodeNo,
+                            ui.newPanel.selector
+                        );
                     } 
                 });
-                g_vocabularyPageInit = true;
+                state.vocaPageInitState = true;
             }
             $('#tabs').tabs('option', 'active', 0);     // select the noun tab.
             $('#noun-tab').addClass('ui-btn-active');   // NOTE: the noun tab is not highlighted. --;
-            VocaLoader.loadWords(g_storeObj.selectedEpisodeNo, '#noun-body');
+            VocaLoader.loadWords(state.selectedEpisodeNo, '#noun-body');
         });
     }
 } // class PageView
