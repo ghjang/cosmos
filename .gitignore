@@ -1,2 +1,6 @@
 
 .DS_Store
+
+*.js.map
+
+docs/js/cosmos_voca.js
