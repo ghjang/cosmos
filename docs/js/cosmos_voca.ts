@@ -35,15 +35,15 @@ class VocaLoader
 {
     static loadWords(episodeNo: number, panelSelector: string): void
     {
-        var wordClass = panelSelector.substring(1, panelSelector.indexOf("-"));
-        var fileName = episodeNo + "." + wordClass.toUpperCase() + ".txt";
+        let wordClass = panelSelector.substring(1, panelSelector.indexOf("-"));
+        let fileName = episodeNo + "." + wordClass.toUpperCase() + ".txt";
         $.ajax({
             url: "https://ghjang.github.io/cosmos/txt/" + fileName,
             dataType: "text",
             success: function(data, status, jqXHR) {
-                var listHtml = `<div data-role="collapsibleset" data-theme="a" data-content-theme="a"
+                let listHtml = `<div data-role="collapsibleset" data-theme="a" data-content-theme="a"
                                      data-filter="true" data-inset="true" data-input="#searchForCollapsibleSet">`;
-                var words = data.split('\n');
+                let words = data.split('\n');
                 words.forEach((item, index) => {
                     listHtml += `<div data-role="collapsible" data-filtertext="${item}">
                                     <h3>${item}</h3>
