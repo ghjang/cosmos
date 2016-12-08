@@ -70,6 +70,9 @@ var VocaLoader = (function () {
     function VocaLoader() {
     }
     VocaLoader.loadWords = function (episodeNo, panelSelector) {
+        if ($(panelSelector).children().length > 0) {
+            return;
+        }
         var wordClass = panelSelector.substring(1, panelSelector.indexOf("-"));
         var fileName = episodeNo + "." + wordClass.toUpperCase() + ".txt";
         $.ajax({
@@ -129,6 +132,13 @@ var PageView = (function () {
             $('#tabs').tabs('option', 'active', 0); // select the noun tab.
             $('#noun-tab').addClass('ui-btn-active'); // NOTE: the noun tab is not highlighted. --;
             VocaLoader.loadWords(state.selectedEpisodeNo, '#noun-body');
+        });
+        // vocabulary page, the second page.
+        $(document).on('pagehide', '#vocabulary', function () {
+            $('#noun-body').empty();
+            $('#verb-body').empty();
+            $('#adj-body').empty();
+            $('#adv-body').empty();
         });
     };
     return PageView;
