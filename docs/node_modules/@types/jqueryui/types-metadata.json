@@ -1,0 +1,23 @@
+{
+    "authors": "Boris Yankov <https://github.com/borisyankov/>, John Reilly <https://github.com/johnnyreilly>",
+    "definitionFilename": "index.d.ts",
+    "libraryDependencies": [
+        "jquery"
+    ],
+    "moduleDependencies": [],
+    "libraryMajorVersion": "1",
+    "libraryMinorVersion": "11",
+    "libraryName": "jQueryUI 1.11",
+    "typingsPackageName": "jqueryui",
+    "projectName": "http://jqueryui.com/",
+    "sourceRepoURL": "https://www.github.com/DefinitelyTyped/DefinitelyTyped",
+    "sourceBranch": "types-2.0",
+    "kind": "Global",
+    "globals": [],
+    "declaredModules": [],
+    "files": [
+        "index.d.ts"
+    ],
+    "hasPackageJson": false,
+    "contentHash": "303a6e9660dbf9714775d452d42130361605331d8aee9b5e16622427f278c4b3"
+}
