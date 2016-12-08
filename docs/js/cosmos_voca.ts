@@ -31,6 +31,35 @@ class GlobalState
 } // class GlobalState
 
 
+class Dictionary
+{
+    static loadDefinition(elem: any, word: string, wordClass: string): void
+    {
+        if ($(elem).text().length > 0) { // if already loaded,
+            return;
+        }
+
+        if ('adj' == wordClass) {
+            wordClass = 'adjective';
+        } else if ('adv' == wordClass) {
+            wordClass = 'adverb';
+        }
+        
+        $.ajax({
+            url: `http://api.pearson.com/v2/dictionaries/ldoce5/entries?headword=${word}&part_of_speech=${wordClass}&limit=1&apikey=pF2UC6GfDAjsuVwmX6yQ7V6LOM26fGo6`,
+            dataType: "json",
+            success: (data, status, jqXHR) => {
+                try {
+                    $(elem).text(data.results[0].senses[0].definition[0]);
+                } catch(err) {
+                    $(elem).text('No definitions were found.');
+                }
+            }
+        });        
+    }
+} // class Dictionary
+
+
 class VocaLoader
 {
     static loadWords(episodeNo: number, panelSelector: string): void
@@ -40,18 +69,25 @@ class VocaLoader
         $.ajax({
             url: "https://ghjang.github.io/cosmos/txt/" + fileName,
             dataType: "text",
-            success: function(data, status, jqXHR) {
+            success: (data, status, jqXHR) => {
                 let listHtml = `<div data-role="collapsibleset" data-theme="a" data-content-theme="a"
                                      data-filter="true" data-inset="true" data-input="#searchForCollapsibleSet">`;
                 let words = data.split('\n');
                 words.forEach((item, index) => {
-                    listHtml += `<div data-role="collapsible" data-filtertext="${item}">
+                    listHtml += `<div data-role="collapsible" data-filtertext="${item}" class="wordCollapsible">
                                     <h3>${item}</h3>
-                                    <p>${index}</p>
+                                    <p class="wordDef"></p>
                                  </div>`;
                 });
                 listHtml += '</div>';
                 $(listHtml).appendTo(panelSelector);
+                $('.wordCollapsible').on("collapsibleexpand", (e, ui) => {
+                    Dictionary.loadDefinition(
+                        $(e.target).find('.wordDef')[0],
+                        $(e.target).attr('data-filtertext'),
+                        wordClass
+                    );
+                });
                 $('#tabs').enhanceWithin();
             }
         });
@@ -64,11 +100,11 @@ class PageView
     static init(): void
     {
         // table of contents page, the front page.
-        $(document).on('pagebeforeshow', '#table-of-contents', function(){
+        $(document).on('pagebeforeshow', '#table-of-contents', () => {
             if (GlobalState.getInstance().tocPageInitState) {
                 return;
             }       
-            $(document).on('click', '.next-page-button', function(){
+            $(document).on('click', '.next-page-button', function() {
                 let state = GlobalState.getInstance();
                 state.selectedEpisodeNo
                     = this.innerText.substring(0, this.innerText.indexOf('.'));
@@ -79,7 +115,7 @@ class PageView
         });
 
         // vocabulary page, the second page.
-        $(document).on('pagebeforeshow', '#vocabulary', function(){
+        $(document).on('pagebeforeshow', '#vocabulary', () => {
             let state = GlobalState.getInstance();
             if (state.selectedEpisodeTitle == '') {
                 $.mobile.changePage('#table-of-contents');
@@ -88,7 +124,7 @@ class PageView
             $('#episode-name').text(state.selectedEpisodeTitle);
             if (!state.vocaPageInitState) {
                 $('#tabs').tabs({
-                    activate: function(e, ui) {
+                    activate: (e, ui) => {
                         VocaLoader.loadWords(
                             GlobalState.getInstance().selectedEpisodeNo,
                             ui.newPanel.selector

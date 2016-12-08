@@ -38,6 +38,34 @@ var GlobalState = (function () {
     });
     return GlobalState;
 }()); // class GlobalState
+var Dictionary = (function () {
+    function Dictionary() {
+    }
+    Dictionary.loadDefinition = function (elem, word, wordClass) {
+        if ($(elem).text().length > 0) {
+            return;
+        }
+        if ('adj' == wordClass) {
+            wordClass = 'adjective';
+        }
+        else if ('adv' == wordClass) {
+            wordClass = 'adverb';
+        }
+        $.ajax({
+            url: "http://api.pearson.com/v2/dictionaries/ldoce5/entries?headword=" + word + "&part_of_speech=" + wordClass + "&limit=1&apikey=pF2UC6GfDAjsuVwmX6yQ7V6LOM26fGo6",
+            dataType: "json",
+            success: function (data, status, jqXHR) {
+                try {
+                    $(elem).text(data.results[0].senses[0].definition[0]);
+                }
+                catch (err) {
+                    $(elem).text('No definitions were found.');
+                }
+            }
+        });
+    };
+    return Dictionary;
+}()); // class Dictionary
 var VocaLoader = (function () {
     function VocaLoader() {
     }
@@ -51,10 +79,13 @@ var VocaLoader = (function () {
                 var listHtml = "<div data-role=\"collapsibleset\" data-theme=\"a\" data-content-theme=\"a\"\n                                     data-filter=\"true\" data-inset=\"true\" data-input=\"#searchForCollapsibleSet\">";
                 var words = data.split('\n');
                 words.forEach(function (item, index) {
-                    listHtml += "<div data-role=\"collapsible\" data-filtertext=\"" + item + "\">\n                                    <h3>" + item + "</h3>\n                                    <p>" + index + "</p>\n                                 </div>";
+                    listHtml += "<div data-role=\"collapsible\" data-filtertext=\"" + item + "\" class=\"wordCollapsible\">\n                                    <h3>" + item + "</h3>\n                                    <p class=\"wordDef\"></p>\n                                 </div>";
                 });
                 listHtml += '</div>';
                 $(listHtml).appendTo(panelSelector);
+                $('.wordCollapsible').on("collapsibleexpand", function (e, ui) {
+                    Dictionary.loadDefinition($(e.target).find('.wordDef')[0], $(e.target).attr('data-filtertext'), wordClass);
+                });
                 $('#tabs').enhanceWithin();
             }
         });
