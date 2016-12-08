@@ -7,58 +7,74 @@ var g_storeObj = {
 var g_tableOfContentsPageInit = false;
 var g_vocabularyPageInit = false;
 
-function loadWords(episodeNo, panelSelector)
+class VocaLoader
 {
-    var wordClass = panelSelector.substring(1, panelSelector.indexOf("-"));
-    var fileName = episodeNo + "." + wordClass.toUpperCase() + ".txt";
-    $.ajax({
-        url: "https://ghjang.github.io/cosmos/txt/" + fileName,
-        dataType: "text",
-        success: function(data, status, jqXHR) {
-            var listHtml = '<div data-role="collapsibleset" data-theme="a" data-content-theme="a"'
-                                + ' data-filter="true" data-inset="true" data-input="#searchForCollapsibleSet">';
-            var words = data.split('\n');
-            words.forEach((item, index) => {
-                listHtml += '<div data-role="collapsible" data-filtertext="' + item + '">';
-                listHtml += '<h3>' + item + '</h3>';
-                listHtml += '<p>' + index + '</p>';
+    static loadWords(episodeNo: number, panelSelector: string): void
+    {
+        var wordClass = panelSelector.substring(1, panelSelector.indexOf("-"));
+        var fileName = episodeNo + "." + wordClass.toUpperCase() + ".txt";
+        $.ajax({
+            url: "https://ghjang.github.io/cosmos/txt/" + fileName,
+            dataType: "text",
+            success: function(data, status, jqXHR) {
+                var listHtml = '<div data-role="collapsibleset" data-theme="a" data-content-theme="a"'
+                                    + ' data-filter="true" data-inset="true" data-input="#searchForCollapsibleSet">';
+                var words = data.split('\n');
+                words.forEach((item, index) => {
+                    listHtml += '<div data-role="collapsible" data-filtertext="' + item + '">';
+                    listHtml += '<h3>' + item + '</h3>';
+                    listHtml += '<p>' + index + '</p>';
+                    listHtml += '</div>';
+                });
                 listHtml += '</div>';
-            });
-            listHtml += '</div>';
-            $(listHtml).appendTo(panelSelector);
-            $('#tabs').enhanceWithin();
-        }
-    });
-}
-
-$(document).on('pagebeforeshow', '#table-of-contents', function(){
-    if (g_tableOfContentsPageInit) {
-        return;
-    }       
-    $(document).on('click', '.next-page-button', function(){
-        g_storeObj.selectedEpisodeNo
-            = this.innerText.substring(0, this.innerText.indexOf('.'));
-        g_storeObj.selectedEpisodeTitle = this.innerText;
-        $.mobile.changePage('#vocabulary');
-    });
-    g_tableOfContentsPageInit = true;
-});
-
-$(document).on('pagebeforeshow', '#vocabulary', function(){
-    if (g_storeObj.selectedEpisodeTitle == '') {
-        $.mobile.changePage('#table-of-contents');
-        return;
-    }
-    $('#episode-name').text(g_storeObj.selectedEpisodeTitle);
-    if (!g_vocabularyPageInit) {
-        $('#tabs').tabs({
-            activate: function(e, ui) {
-                loadWords(g_storeObj.selectedEpisodeNo, ui.newPanel.selector);
-            } 
+                $(listHtml).appendTo(panelSelector);
+                $('#tabs').enhanceWithin();
+            }
         });
-        g_vocabularyPageInit = true;
     }
-    $('#tabs').tabs('option', 'active', 0);     // select the noun tab.
-    $('#noun-tab').addClass('ui-btn-active');   // NOTE: the noun tab is not highlighted. --;
-    loadWords(g_storeObj.selectedEpisodeNo, '#noun-body');
-});
+} // class VocaLoader
+
+
+class PageView
+{
+    static init(): void
+    {
+        // table of contents page, the front page.
+        $(document).on('pagebeforeshow', '#table-of-contents', function(){
+            if (g_tableOfContentsPageInit) {
+                return;
+            }       
+            $(document).on('click', '.next-page-button', function(){
+                g_storeObj.selectedEpisodeNo
+                    = this.innerText.substring(0, this.innerText.indexOf('.'));
+                g_storeObj.selectedEpisodeTitle = this.innerText;
+                $.mobile.changePage('#vocabulary');
+            });
+            g_tableOfContentsPageInit = true;
+        });
+
+        // vocabulary page, the second page.
+        $(document).on('pagebeforeshow', '#vocabulary', function(){
+            if (g_storeObj.selectedEpisodeTitle == '') {
+                $.mobile.changePage('#table-of-contents');
+                return;
+            }
+            $('#episode-name').text(g_storeObj.selectedEpisodeTitle);
+            if (!g_vocabularyPageInit) {
+                $('#tabs').tabs({
+                    activate: function(e, ui) {
+                        VocaLoader.loadWords(g_storeObj.selectedEpisodeNo, ui.newPanel.selector);
+                    } 
+                });
+                g_vocabularyPageInit = true;
+            }
+            $('#tabs').tabs('option', 'active', 0);     // select the noun tab.
+            $('#noun-tab').addClass('ui-btn-active');   // NOTE: the noun tab is not highlighted. --;
+            VocaLoader.loadWords(g_storeObj.selectedEpisodeNo, '#noun-body');
+        });
+    }
+} // class PageView
+
+
+// init the page views.
+PageView.init();
