@@ -19,6 +19,8 @@ class GlobalState
     set tocPageInitState(state: boolean) { this.tableOfContentsPageInit_ = state; }
     get vocaPageInitState(): boolean { return this.vocabularyPageInit_; }
     set vocaPageInitState(state: boolean) { this.vocabularyPageInit_ = state; }
+
+    get baseUrl(): string { return 'https://ghjang.github.io/cosmos'; }
 } // class GlobalState
 
 
@@ -27,6 +29,14 @@ const g_state: GlobalState = SingletonHolder.getInstance(GlobalState);
 
 class Dictionary
 {
+    private static dictApiUrlBase_: string
+        = "http://api.pearson.com/v2/dictionaries/ldoce5/entries";
+
+    private static createDictApiUrl(word: string, wordClass: string): string
+    {
+        return `${this.dictApiUrlBase_}?headword=${word}&part_of_speech=${wordClass}&limit=1&apikey=pF2UC6GfDAjsuVwmX6yQ7V6LOM26fGo6`;
+    }
+
     static loadDefinition(elem: any, word: string, wordClass: string): void
     {
         if ($(elem).text().length > 0) { // if already loaded,
@@ -40,7 +50,7 @@ class Dictionary
         }
         
         $.ajax({
-            url: `http://api.pearson.com/v2/dictionaries/ldoce5/entries?headword=${word}&part_of_speech=${wordClass}&limit=1&apikey=pF2UC6GfDAjsuVwmX6yQ7V6LOM26fGo6`,
+            url: this.createDictApiUrl(word, wordClass),
             dataType: "json",
             success: (data, status, jqXHR) => {
                 try {
@@ -65,7 +75,7 @@ class VocaLoader
         let wordClass = panelSelector.substring(1, panelSelector.indexOf("-"));
         let fileName = episodeNo + "." + wordClass.toUpperCase() + ".txt";
         $.ajax({
-            url: "https://ghjang.github.io/cosmos/txt/" + fileName,
+            url: `${g_state.baseUrl}/txt/${fileName}`,
             dataType: "text",
             success: (data, status, jqXHR) => {
                 let listHtml = `<div data-role="collapsibleset" data-theme="a" data-content-theme="a"

@@ -26,10 +26,14 @@ class GlobalState {
     set tocPageInitState(state) { this.tableOfContentsPageInit_ = state; }
     get vocaPageInitState() { return this.vocabularyPageInit_; }
     set vocaPageInitState(state) { this.vocabularyPageInit_ = state; }
+    get baseUrl() { return 'https://ghjang.github.io/cosmos'; }
 }
  // class GlobalState
 const g_state = SingletonHolder.getInstance(GlobalState);
 class Dictionary {
+    static createDictApiUrl(word, wordClass) {
+        return `${this.dictApiUrlBase_}?headword=${word}&part_of_speech=${wordClass}&limit=1&apikey=pF2UC6GfDAjsuVwmX6yQ7V6LOM26fGo6`;
+    }
     static loadDefinition(elem, word, wordClass) {
         if ($(elem).text().length > 0) {
             return;
@@ -41,7 +45,7 @@ class Dictionary {
             wordClass = 'adverb';
         }
         $.ajax({
-            url: `http://api.pearson.com/v2/dictionaries/ldoce5/entries?headword=${word}&part_of_speech=${wordClass}&limit=1&apikey=pF2UC6GfDAjsuVwmX6yQ7V6LOM26fGo6`,
+            url: this.createDictApiUrl(word, wordClass),
             dataType: "json",
             success: (data, status, jqXHR) => {
                 try {
@@ -54,7 +58,7 @@ class Dictionary {
         });
     }
 }
- // class Dictionary
+Dictionary.dictApiUrlBase_ = "http://api.pearson.com/v2/dictionaries/ldoce5/entries"; // class Dictionary
 class VocaLoader {
     static loadWords(episodeNo, panelSelector) {
         if ($(panelSelector).children().length > 0) {
@@ -63,7 +67,7 @@ class VocaLoader {
         let wordClass = panelSelector.substring(1, panelSelector.indexOf("-"));
         let fileName = episodeNo + "." + wordClass.toUpperCase() + ".txt";
         $.ajax({
-            url: "https://ghjang.github.io/cosmos/txt/" + fileName,
+            url: `${g_state.baseUrl}/txt/${fileName}`,
             dataType: "text",
             success: (data, status, jqXHR) => {
                 let listHtml = `<div data-role="collapsibleset" data-theme="a" data-content-theme="a"
