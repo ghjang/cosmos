@@ -1,4 +1,3 @@
-/// <reference path="singleton_holder.ts" />
 class SingletonHolder {
     constructor() {
     }
@@ -10,7 +9,8 @@ class SingletonHolder {
     }
 }
 SingletonHolder.className2InstanceMap_ = {};
-// singleton global state
+/// <reference path="singleton_holder.ts" />
+// for global state
 class GlobalState {
     constructor() {
         this.selectedEpisodeNo_ = 0;
