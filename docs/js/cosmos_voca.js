@@ -1,47 +1,36 @@
+/// <reference path="singleton_holder.ts" />
+class SingletonHolder {
+    constructor() {
+    }
+    static getInstance(t) {
+        if (undefined == this.className2InstanceMap_[t.name]) {
+            this.className2InstanceMap_[t.name] = new t();
+        }
+        return this.className2InstanceMap_[t.name];
+    }
+}
+SingletonHolder.className2InstanceMap_ = {};
 // singleton global state
-var GlobalState = (function () {
-    function GlobalState() {
+class GlobalState {
+    constructor() {
         this.selectedEpisodeNo_ = 0;
         this.selectedEpisodeTitle_ = '';
         this.tableOfContentsPageInit_ = false;
         this.vocabularyPageInit_ = false;
     }
-    GlobalState.getInstance = function () {
-        if (!GlobalState.instance_) {
-            GlobalState.instance_ = new GlobalState();
-        }
-        return GlobalState.instance_;
-    };
-    Object.defineProperty(GlobalState.prototype, "selectedEpisodeNo", {
-        get: function () { return this.selectedEpisodeNo_; },
-        set: function (no) { this.selectedEpisodeNo_ = no; },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(GlobalState.prototype, "selectedEpisodeTitle", {
-        get: function () { return this.selectedEpisodeTitle_; },
-        set: function (title) { this.selectedEpisodeTitle_ = title; },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(GlobalState.prototype, "tocPageInitState", {
-        get: function () { return this.tableOfContentsPageInit_; },
-        set: function (state) { this.tableOfContentsPageInit_ = state; },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(GlobalState.prototype, "vocaPageInitState", {
-        get: function () { return this.vocabularyPageInit_; },
-        set: function (state) { this.vocabularyPageInit_ = state; },
-        enumerable: true,
-        configurable: true
-    });
-    return GlobalState;
-}()); // class GlobalState
-var Dictionary = (function () {
-    function Dictionary() {
-    }
-    Dictionary.loadDefinition = function (elem, word, wordClass) {
+    get selectedEpisodeNo() { return this.selectedEpisodeNo_; }
+    set selectedEpisodeNo(no) { this.selectedEpisodeNo_ = no; }
+    get selectedEpisodeTitle() { return this.selectedEpisodeTitle_; }
+    set selectedEpisodeTitle(title) { this.selectedEpisodeTitle_ = title; }
+    get tocPageInitState() { return this.tableOfContentsPageInit_; }
+    set tocPageInitState(state) { this.tableOfContentsPageInit_ = state; }
+    get vocaPageInitState() { return this.vocabularyPageInit_; }
+    set vocaPageInitState(state) { this.vocabularyPageInit_ = state; }
+}
+ // class GlobalState
+const g_state = SingletonHolder.getInstance(GlobalState);
+class Dictionary {
+    static loadDefinition(elem, word, wordClass) {
         if ($(elem).text().length > 0) {
             return;
         }
@@ -52,9 +41,9 @@ var Dictionary = (function () {
             wordClass = 'adverb';
         }
         $.ajax({
-            url: "http://api.pearson.com/v2/dictionaries/ldoce5/entries?headword=" + word + "&part_of_speech=" + wordClass + "&limit=1&apikey=pF2UC6GfDAjsuVwmX6yQ7V6LOM26fGo6",
+            url: `http://api.pearson.com/v2/dictionaries/ldoce5/entries?headword=${word}&part_of_speech=${wordClass}&limit=1&apikey=pF2UC6GfDAjsuVwmX6yQ7V6LOM26fGo6`,
             dataType: "json",
-            success: function (data, status, jqXHR) {
+            success: (data, status, jqXHR) => {
                 try {
                     $(elem).text(data.results[0].senses[0].definition[0]);
                 }
@@ -63,86 +52,84 @@ var Dictionary = (function () {
                 }
             }
         });
-    };
-    return Dictionary;
-}()); // class Dictionary
-var VocaLoader = (function () {
-    function VocaLoader() {
     }
-    VocaLoader.loadWords = function (episodeNo, panelSelector) {
+}
+ // class Dictionary
+class VocaLoader {
+    static loadWords(episodeNo, panelSelector) {
         if ($(panelSelector).children().length > 0) {
             return;
         }
-        var wordClass = panelSelector.substring(1, panelSelector.indexOf("-"));
-        var fileName = episodeNo + "." + wordClass.toUpperCase() + ".txt";
+        let wordClass = panelSelector.substring(1, panelSelector.indexOf("-"));
+        let fileName = episodeNo + "." + wordClass.toUpperCase() + ".txt";
         $.ajax({
             url: "https://ghjang.github.io/cosmos/txt/" + fileName,
             dataType: "text",
-            success: function (data, status, jqXHR) {
-                var listHtml = "<div data-role=\"collapsibleset\" data-theme=\"a\" data-content-theme=\"a\"\n                                     data-filter=\"true\" data-inset=\"true\" data-input=\"#searchForCollapsibleSet\">";
-                var words = data.split('\n');
-                words.forEach(function (item, index) {
-                    listHtml += "<div data-role=\"collapsible\" data-filtertext=\"" + item + "\" class=\"wordCollapsible\">\n                                    <h3>" + item + "</h3>\n                                    <p class=\"wordDef\"></p>\n                                 </div>";
+            success: (data, status, jqXHR) => {
+                let listHtml = `<div data-role="collapsibleset" data-theme="a" data-content-theme="a"
+                                     data-filter="true" data-inset="true" data-input="#searchForCollapsibleSet">`;
+                let words = data.split('\n');
+                words.forEach((item, index) => {
+                    listHtml += `<div data-role="collapsible" data-filtertext="${item}" class="wordCollapsible">
+                                    <h3>${item}</h3>
+                                    <p class="wordDef"></p>
+                                 </div>`;
                 });
                 listHtml += '</div>';
                 $(listHtml).appendTo(panelSelector);
-                $('.wordCollapsible').on("collapsibleexpand", function (e, ui) {
+                $('.wordCollapsible').on("collapsibleexpand", (e, ui) => {
                     Dictionary.loadDefinition($(e.target).find('.wordDef')[0], $(e.target).attr('data-filtertext'), wordClass);
                 });
                 $('#tabs').enhanceWithin();
             }
         });
-    };
-    return VocaLoader;
-}()); // class VocaLoader
-var PageView = (function () {
-    function PageView() {
     }
-    PageView.init = function () {
+}
+ // class VocaLoader
+class PageView {
+    static init() {
         // table of contents page, the front page.
-        $(document).on('pagebeforeshow', '#table-of-contents', function () {
-            if (GlobalState.getInstance().tocPageInitState) {
+        $(document).on('pagebeforeshow', '#table-of-contents', () => {
+            if (g_state.tocPageInitState) {
                 return;
             }
             $(document).on('click', '.next-page-button', function () {
-                var state = GlobalState.getInstance();
-                state.selectedEpisodeNo
+                g_state.selectedEpisodeNo
                     = this.innerText.substring(0, this.innerText.indexOf('.'));
-                state.selectedEpisodeTitle = this.innerText;
+                g_state.selectedEpisodeTitle = this.innerText;
                 $.mobile.changePage('#vocabulary');
             });
-            GlobalState.getInstance().tocPageInitState = true;
+            g_state.tocPageInitState = true;
         });
         // vocabulary page, the second page.
-        $(document).on('pagebeforeshow', '#vocabulary', function () {
-            var state = GlobalState.getInstance();
-            if (state.selectedEpisodeTitle == '') {
+        $(document).on('pagebeforeshow', '#vocabulary', () => {
+            if (g_state.selectedEpisodeTitle == '') {
                 $.mobile.changePage('#table-of-contents');
                 return;
             }
-            $('#episode-name').text(state.selectedEpisodeTitle);
-            if (!state.vocaPageInitState) {
+            $('#episode-name').text(g_state.selectedEpisodeTitle);
+            if (!g_state.vocaPageInitState) {
                 $('#tabs').tabs({
-                    activate: function (e, ui) {
-                        VocaLoader.loadWords(GlobalState.getInstance().selectedEpisodeNo, ui.newPanel.selector);
+                    activate: (e, ui) => {
+                        VocaLoader.loadWords(g_state.selectedEpisodeNo, ui.newPanel.selector);
                     }
                 });
-                state.vocaPageInitState = true;
+                g_state.vocaPageInitState = true;
             }
             $('#tabs').tabs('option', 'active', 0); // select the noun tab.
             $('#noun-tab').addClass('ui-btn-active'); // NOTE: the noun tab is not highlighted. --;
-            VocaLoader.loadWords(state.selectedEpisodeNo, '#noun-body');
+            VocaLoader.loadWords(g_state.selectedEpisodeNo, '#noun-body');
         });
         // vocabulary page, the second page.
-        $(document).on('pagehide', '#vocabulary', function () {
+        $(document).on('pagehide', '#vocabulary', () => {
             $('#noun-body').empty();
             $('#verb-body').empty();
             $('#adj-body').empty();
             $('#adv-body').empty();
         });
-    };
-    return PageView;
-}()); // class PageView
+    }
+}
+ // class PageView
 // init the page views.
 PageView.init();
 //# sourceMappingURL=cosmos_voca.js.map

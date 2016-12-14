@@ -1,18 +1,24 @@
+/// <reference path="singleton_holder.ts" />
+
+class SingletonHolder
+{
+    private static className2InstanceMap_ = {};
+    
+    private constructor() { }
+
+    static getInstance<T>(t: { new(): T }): T
+    {
+        if (undefined == this.className2InstanceMap_[t.name]) {
+            this.className2InstanceMap_[t.name] = new t();
+        }
+        return this.className2InstanceMap_[t.name];
+    }
+}
+
+
 // singleton global state
 class GlobalState
 {
-    private static instance_: GlobalState;
-
-    private constructor() { }
-
-    static getInstance(): GlobalState
-    {
-        if (!GlobalState.instance_) {
-            GlobalState.instance_ = new GlobalState();
-        }
-        return GlobalState.instance_;
-    }
-
     private selectedEpisodeNo_: number = 0;
     private selectedEpisodeTitle_: string = '';
 
@@ -29,6 +35,9 @@ class GlobalState
     get vocaPageInitState(): boolean { return this.vocabularyPageInit_; }
     set vocaPageInitState(state: boolean) { this.vocabularyPageInit_ = state; }
 } // class GlobalState
+
+
+const g_state: GlobalState = SingletonHolder.getInstance(GlobalState);
 
 
 class Dictionary
@@ -105,41 +114,39 @@ class PageView
     {
         // table of contents page, the front page.
         $(document).on('pagebeforeshow', '#table-of-contents', () => {
-            if (GlobalState.getInstance().tocPageInitState) {
+            if (g_state.tocPageInitState) {
                 return;
             }       
             $(document).on('click', '.next-page-button', function() {
-                let state = GlobalState.getInstance();
-                state.selectedEpisodeNo
+                g_state.selectedEpisodeNo
                     = this.innerText.substring(0, this.innerText.indexOf('.'));
-                state.selectedEpisodeTitle = this.innerText;
+                g_state.selectedEpisodeTitle = this.innerText;
                 $.mobile.changePage('#vocabulary');
             });
-            GlobalState.getInstance().tocPageInitState = true;
+            g_state.tocPageInitState = true;
         });
 
         // vocabulary page, the second page.
         $(document).on('pagebeforeshow', '#vocabulary', () => {
-            let state = GlobalState.getInstance();
-            if (state.selectedEpisodeTitle == '') {
+            if (g_state.selectedEpisodeTitle == '') {
                 $.mobile.changePage('#table-of-contents');
                 return;
             }
-            $('#episode-name').text(state.selectedEpisodeTitle);
-            if (!state.vocaPageInitState) {
+            $('#episode-name').text(g_state.selectedEpisodeTitle);
+            if (!g_state.vocaPageInitState) {
                 $('#tabs').tabs({
                     activate: (e, ui) => {
                         VocaLoader.loadWords(
-                            GlobalState.getInstance().selectedEpisodeNo,
+                            g_state.selectedEpisodeNo,
                             ui.newPanel.selector
                         );
                     } 
                 });
-                state.vocaPageInitState = true;
+                g_state.vocaPageInitState = true;
             }
             $('#tabs').tabs('option', 'active', 0);     // select the noun tab.
             $('#noun-tab').addClass('ui-btn-active');   // NOTE: the noun tab is not highlighted. --;
-            VocaLoader.loadWords(state.selectedEpisodeNo, '#noun-body');
+            VocaLoader.loadWords(g_state.selectedEpisodeNo, '#noun-body');
         });
 
         // vocabulary page, the second page.
