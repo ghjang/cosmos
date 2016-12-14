@@ -34,7 +34,7 @@ class Dictionary
 
     private static createDictApiUrl(word: string, wordClass: string): string
     {
-        return `${this.dictApiUrlBase_}?headword=${word}&part_of_speech=${wordClass}&limit=1&apikey=pF2UC6GfDAjsuVwmX6yQ7V6LOM26fGo6`;
+        return `${this.dictApiUrlBase_}?headword=${word}&part_of_speech=${wordClass}&limit=1&apikey=pF2UC6GfDAjsuVwmX6yQ7V6LOM26fGo6&jsonp=?`;
     }
 
     static loadDefinition(elem: any, word: string, wordClass: string): void
@@ -49,17 +49,16 @@ class Dictionary
             wordClass = 'adverb';
         }
         
-        $.ajax({
-            url: this.createDictApiUrl(word, wordClass),
-            dataType: "json",
-            success: (data, status, jqXHR) => {
+        $.getJSON(
+            this.createDictApiUrl(word, wordClass),
+            (data) => {
                 try {
                     $(elem).text(data.results[0].senses[0].definition[0]);
                 } catch(err) {
                     $(elem).text('No definitions were found.');
                 }
             }
-        });        
+        );        
     }
 } // class Dictionary
 

@@ -32,7 +32,7 @@ class GlobalState {
 const g_state = SingletonHolder.getInstance(GlobalState);
 class Dictionary {
     static createDictApiUrl(word, wordClass) {
-        return `${this.dictApiUrlBase_}?headword=${word}&part_of_speech=${wordClass}&limit=1&apikey=pF2UC6GfDAjsuVwmX6yQ7V6LOM26fGo6`;
+        return `${this.dictApiUrlBase_}?headword=${word}&part_of_speech=${wordClass}&limit=1&apikey=pF2UC6GfDAjsuVwmX6yQ7V6LOM26fGo6&jsonp=?`;
     }
     static loadDefinition(elem, word, wordClass) {
         if ($(elem).text().length > 0) {
@@ -44,16 +44,12 @@ class Dictionary {
         else if ('adv' == wordClass) {
             wordClass = 'adverb';
         }
-        $.ajax({
-            url: this.createDictApiUrl(word, wordClass),
-            dataType: "json",
-            success: (data, status, jqXHR) => {
-                try {
-                    $(elem).text(data.results[0].senses[0].definition[0]);
-                }
-                catch (err) {
-                    $(elem).text('No definitions were found.');
-                }
+        $.getJSON(this.createDictApiUrl(word, wordClass), (data) => {
+            try {
+                $(elem).text(data.results[0].senses[0].definition[0]);
+            }
+            catch (err) {
+                $(elem).text('No definitions were found.');
             }
         });
     }
