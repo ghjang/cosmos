@@ -16,7 +16,7 @@ class SingletonHolder
 }
 
 
-// singleton global state
+// for global state
 class GlobalState
 {
     private selectedEpisodeNo_: number = 0;
